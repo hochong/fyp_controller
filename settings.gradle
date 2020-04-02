@@ -1,0 +1,2 @@
+rootProject.name='fyp_controller'
+include ':app', ':virtualjoystick'
