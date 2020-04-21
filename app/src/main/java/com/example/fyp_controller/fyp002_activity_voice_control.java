@@ -7,6 +7,8 @@ import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.makerlab.protocol.Mobile;
+import com.makerlab.protocol.Turret;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -19,10 +21,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class fyp002_activity_voice_control extends AppCompatActivity {
+    private static final int MOBILE_DELAY = 1000;
+    private static final int TURRET_DELAY = 1000;
     private fyp002_controller_application fypCA;
     private Socket s;
     private OutputStream outputStream;
@@ -32,6 +39,8 @@ public class fyp002_activity_voice_control extends AppCompatActivity {
     private boolean MIC_ON = false;
     private int SpeechRecognizerInt = 3000;
     private ImageView mic;
+    private final byte MOBILE = 0;
+    private final byte TURRET = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,19 +107,76 @@ public class fyp002_activity_voice_control extends AppCompatActivity {
                         return;
                     }
                     switch (command.toUpperCase()){
-                        case "FORWARD" : outputStream.write((byte) 0);
+                        case "FORWARD" :
+                            outputStream.write(MOBILE + Mobile.SIDEWAY_UP);
                             break;
-                        case "BACKWARD" : outputStream.write((byte) 6);
+                        case "BACKWARD" :
+                            outputStream.write(MOBILE + Mobile.SIDEWAY_DOWN);
                             break;
-                        case "LEFT" : outputStream.write((byte) 9);
+                        case "LEFT" :
+                            outputStream.write(MOBILE + Mobile.SIDEWAY_LEFT);
                             break;
-                        case "RIGHT" : outputStream.write((byte) 3);
+                        case "RIGHT" :
+                            outputStream.write(MOBILE + Mobile.SIDEWAY_RIGHT);
                             break;
-                        case "STOP" : //do nothing
+                        case "STOP" :
+                            outputStream.write(MOBILE + Mobile.HALT);
                             break;
-                        default: //do nothing
+                        case "UP RIGHT":
+                            outputStream.write(MOBILE + Mobile.DIAG_UP_RIGHT);
+                            break;
+                        case "UPRIGHT":
+                            outputStream.write(MOBILE + Mobile.DIAG_UP_RIGHT);
+                            break;
+                        case "UP LEFT":
+                            outputStream.write(MOBILE + Mobile.DIAG_UP_LEFT);
+                            break;
+                        case "DOWN RIGHT":
+                            outputStream.write(MOBILE + Mobile.DIAG_DOWN_RIGHT);
+                            break;
+                        case "DOWN LEFT":
+                            outputStream.write(MOBILE + Mobile.DIAG_DOWN_LEFT);
+                            break;
+                        case "TURRET UP":
+                            outputStream.write(TURRET + Turret.UP);
+                            break;
+                        case "TURRET DOWN":
+                            outputStream.write(TURRET + Turret.DOWN);
+                            break;
+                        case "TURRET LEFT":
+                            outputStream.write(TURRET + Turret.LEFT);
+                            break;
+                        case "TURRET RIGHT":
+                            outputStream.write(TURRET + Turret.RIGHT);
+                            break;
+                        case "TURRET HOME":
+                            outputStream.write(TURRET + Turret.HOME);
+                            break;
+                        default:
+                            outputStream.write(MOBILE + Mobile.HALT);
+                            outputStream.write(TURRET + Turret.HALT);
                             break;
                     }
+                    new Timer().schedule(new TimerTask(){
+                        @Override
+                        public void run(){
+                            try {
+                                outputStream.write(MOBILE + Mobile.HALT);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    },MOBILE_DELAY);
+                    new Timer().schedule(new TimerTask(){
+                        @Override
+                        public void run(){
+                            try {
+                                outputStream.write(TURRET + Turret.HALT);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    },TURRET_DELAY);
                 }catch(Exception e){ Log.i("VoiceControlActivity", "failed with exception: "+e);}
 
 

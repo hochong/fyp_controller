@@ -15,12 +15,17 @@ import android.view.View;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import com.makerlab.protocol.Mobile;
+import com.makerlab.protocol.Turret;
+
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
 public class fyp002_activity_joystick_control extends AppCompatActivity {
     private fyp002_controller_application fypCA;
     private Socket s;
     private OutputStream outputStream;
+    private final byte MOBILE = 0;
+    private final byte TURRET = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,28 +59,42 @@ public class fyp002_activity_joystick_control extends AppCompatActivity {
             //TODO implement actual moving through bluetooth connection
             public void onMove(int angle, int strength) {
                 try{
-                    //move forwards 90+-20 activate over 70%
-                    if (angle > 70 && angle < 110 && strength >70){
-                        Log.i("activityjoystickcontrol", "move forward");
-                            outputStream.write((byte) 0);
-
+                    if (angle > 70 && angle <= 110 && strength > 70){
+                        Log.i("MainActivity", "move forward");
+                        outputStream.write(MOBILE + Mobile.SIDEWAY_UP);
                     }
-                    //move left 180+-20 activate over 70%
-                    if (angle > 160 && angle < 200 && strength >70){
-                        Log.i("activityjoystickcontrol", "move left");
-                            outputStream.write((byte) 9);
+                    if (angle > 160 && angle <= 200 && strength > 70){
+                        Log.i("MainActivity", "move left");
+                        outputStream.write(MOBILE + Mobile.SIDEWAY_LEFT);
                     }
-
-                    //move right 0+-20 activate over 70%
-                    if ((angle > 340 || angle < 20) && strength >70){
-                        Log.i("activityjoystickcontrol", "move right");
-                            outputStream.write((byte) 3);
+                    if ((angle > 340 || angle <= 20) && strength > 70){
+                        Log.i("MainActivity", "move right");
+                        outputStream.write(MOBILE + Mobile.SIDEWAY_RIGHT);
                     }
-
-                    //move backwards 270+-20 activate over 70%
-                    if (angle > 250 && angle < 290 && strength >70){
-                        Log.i("activityjoystickcontrol", "move backward");
-                            outputStream.write((byte) 6);
+                    if (angle > 250 && angle <= 290 && strength > 70){
+                        Log.i("MainActivity", "move backward");
+                        outputStream.write(MOBILE + Mobile.SIDEWAY_DOWN);
+                    }
+                    if (angle > 120 && angle <= 160 && strength > 70){
+                        Log.i("MainActivity", "move up + right");
+                        outputStream.write(MOBILE + Mobile.DIAG_UP_RIGHT);
+                    }
+                    if (angle > 20 && angle <= 70 && strength > 70){
+                        Log.i("MainActivity", "move up + left");
+                        outputStream.write(MOBILE + Mobile.DIAG_UP_LEFT);
+                    }
+                    if (angle > 200 && angle <= 250 && strength > 70){
+                        Log.i("MainActivity", "move down + right");
+                        outputStream.write(MOBILE + Mobile.DIAG_DOWN_RIGHT);
+                    }
+                    if (angle > 290 && angle <= 340 && strength > 70){
+                        Log.i("MainActivity", "move down + left");
+                        outputStream.write(MOBILE + Mobile.DIAG_DOWN_LEFT);
+                    }
+                    else{
+                        Log.i("MainActivity", "halt");
+                        outputStream.write(MOBILE + Mobile.HALT);
+                        outputStream.write(MOBILE + Turret.HALT);
                     }
                 } catch (Exception e) {
                     Log.i("activityjoystickcontrol", "failed with exception: "+e);

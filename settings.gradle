@@ -1,2 +1,2 @@
 rootProject.name='fyp_controller'
-include ':app', ':virtualjoystick'
+include ':app', ':virtualjoystick', ':homebotspp', ':libspp'
